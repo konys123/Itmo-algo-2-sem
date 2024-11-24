@@ -1,37 +1,47 @@
 #include <iostream>
 #include <vector>
-#include <cmath>
+
 using namespace std;
 
-void make_grey_code(vector<vector<bool>>& grayCode, int n, int& row) {
-    if (n == 0) {
-        return;
-    }
+vector<vector<int>> G(1000000);
+bool foundCycle = false;
 
-    make_grey_code(grayCode, n - 1, row);
-
-    for (int i = row - 1; i >= 0; --i) {
-        grayCode[row] = grayCode[i];
-        grayCode[row][n-1] = true;
-        row++;
+void dfs(int v, int count, vector<bool> &visited, int start) {
+    visited[v] = true;
+    count += 1;
+    for (int i: G[v]) {
+        if (i == start and count > 2 and !foundCycle) {
+            foundCycle = true;
+            cout << "YES";
+            return;
+        }
+        if (!visited[i]) {
+            dfs(i, count, visited, start);
+        }
     }
 }
 
 int main() {
-    int n;
-    cin >> n;
+    int n, m;
+    cin >> n >> m;
 
-    int size = int(pow(2, n));
-    vector<vector<bool>> grayCode(size, vector<bool>(n, false));
+    for (int i = 0; i < m; ++i) {
+        int start, end;
+        cin >> start >> end;
+        G[start].push_back(end);
+        G[end].push_back(start);
+    }
 
-    int row = 1;
-    make_grey_code(grayCode, n, row);
-
-    for (int i = 0; i < size; ++i) {
-        for (int j = 0; j < n; ++j) {
-            cout << grayCode[i][j];
+    for (int i = 1; i < n + 1; ++i) {
+        if (!foundCycle) {
+            vector<bool> visited(n + 1, false);
+            dfs(i, 0, visited, i);
+        } else {
+            break;
         }
-        cout << '\n';
+    }
+    if (!foundCycle) {
+        cout << "NO";
     }
 
     return 0;
